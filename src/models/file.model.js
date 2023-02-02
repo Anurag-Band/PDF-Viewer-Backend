@@ -14,6 +14,18 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
       filePublicUrl: {
         type: DataTypes.STRING,
       },
+      userEmailId: {
+        type: DataTypes.STRING,
+      },
+      fileName: {
+        type: DataTypes.STRING,
+      },
+      fileSize: {
+        type: DataTypes.BIGINT,
+      },
+      fileType: {
+        type: DataTypes.STRING,
+      },
     },
     {
       // Options

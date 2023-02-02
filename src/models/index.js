@@ -30,8 +30,7 @@ db.sequelize = sequelize;
 db.user = require("./user.model.js")(sequelize, Sequelize, DataTypes);
 db.file = require("./file.model.js")(sequelize, Sequelize, DataTypes);
 
-db.user.hasMany(db.file);
-// user.getFiles()
-db.file.belongsTo(db.user);
+// db.user.hasMany(db.file);
+// db.file.belongsTo(db.user);
 
 module.exports = db;

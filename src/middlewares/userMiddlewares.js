@@ -1,7 +1,6 @@
 const db = require("../models");
 const User = db.user;
 const asyncHandler = require("express-async-handler");
-const CustomError = require("../utils/CustomError");
 const jwt = require("jsonwebtoken");
 
 exports.isUserLoggedIn = asyncHandler(async (req, res, next) => {
@@ -12,16 +11,18 @@ exports.isUserLoggedIn = asyncHandler(async (req, res, next) => {
   }
 
   if (!token) {
-    res.status(401).send({
-      message: "Please Log in to Access this Page!!!",
-    });
-    return;
+    return res.status(401).send();
   }
 
   const decoded = jwt.verify(token, process.env.SECRET_KEY);
 
-  req.user = await User.findByPk(decoded.id);
+  const userDetails = await User.findOne({
+    where: {
+      id: decoded.id,
+    },
+  });
 
+  req.user = userDetails.dataValues;
   next();
 });
 

@@ -2,7 +2,6 @@ const app = require("./app");
 require("dotenv").config({
   path: "../.env",
 });
-const aws = require("aws-sdk");
 const PORT = process.env.PORT || 5001;
 
 // database
@@ -17,12 +16,6 @@ db.sequelize
     console.log("~~~~ Failed to sync db: " + err.message);
   });
 
-// AWS Config
-aws.config.update({
-  secretAccessKey: process.env.AWS_ACCESS_KEY,
-  accessKeyId: process.env.AWS_ACCESS_SECRET,
-  region: "us-east-1",
-});
 
 // Unhandled Promise Rejection
 process.on("unhandledRejection", (err) => {

@@ -3,11 +3,12 @@ require("dotenv").config();
 const app = express();
 const morgan = require("morgan");
 const cors = require("cors");
-// const cookieParser = require("cookie-parser");
+const cookieParser = require("cookie-parser");
 
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000", "http://localhost:3001"],
+    credentials: true,
   })
 );
 
@@ -18,16 +19,17 @@ app.use(
 );
 
 // cookies and file middleware
-// app.use(cookieParser());
+app.use(cookieParser());
 
 //morgan middleware
 app.use(morgan("tiny"));
 
 // for adding headers to requests
 app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin);
   res.header(
     "Access-Control-Allow-Headers",
-    "x-access-token, Origin, Content-Type, Accept"
+    "Origin, X-Requested-With, Content-Type, Accept"
   );
 
   next();
