@@ -22,7 +22,7 @@ exports.isUserLoggedIn = asyncHandler(async (req, res, next) => {
     },
   });
 
-  req.user = userDetails.dataValues;
+  req.user = userDetails?.dataValues;
   next();
 });
 

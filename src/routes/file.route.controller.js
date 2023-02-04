@@ -76,20 +76,39 @@ router.get("/list", async (req, res) => {
   res.send(x);
 });
 
-// router.get(
-//   "/pdf/all",
-//   isUserLoggedIn,
-//   asyncHandler(async (req, res, next) => {
-//     const files = await File.findAll({
-//       where: {
-//         userEmailId: req.user.email,
-//       },
-//     });
+router.get(
+  "/pdf/all",
+  isUserLoggedIn,
+  asyncHandler(async (req, res, next) => {
+    const files = await File.findAll({
+      where: {
+        userEmailId: req.user.email,
+      },
+    });
 
-//     const userFiles = files.map((f) => f.dataValues);
+    const userFiles = files.map((f) => f.dataValues);
 
-//     res.status(200).send(userFiles);
-//   })
-// );
+    res.status(200).send(userFiles);
+  })
+);
+
+router.get(
+  "/pdf/:pdfId",
+  isUserLoggedIn,
+  asyncHandler(async (req, res, next) => {
+    const file = await File.findOne({
+      where: {
+        id: req.params.pdfId,
+      },
+    });
+
+    const userFile = file?.dataValues;
+
+    if (!userFile) {
+      return res.status(404).send("pdf not found !");
+    }
+    res.status(200).send(userFile);
+  })
+);
 
 module.exports = router;
