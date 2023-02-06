@@ -3,9 +3,20 @@ require("dotenv").config({
   path: "../.env",
 });
 const PORT = process.env.PORT || 5001;
+const aws = require("aws-sdk");
 
 // database
 const db = require("./models/index");
+
+const accessKeyId = process.env.AWS_ACCESS_KEY;
+const secretAccessKey = process.env.AWS_ACCESS_SECRET;
+
+// AWS Config
+aws.config.update({
+  accessKeyId: accessKeyId,
+  secretAccessKey: secretAccessKey,
+  region: "us-east-1",
+});
 
 db.sequelize
   .sync()

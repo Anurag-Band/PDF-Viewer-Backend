@@ -2,37 +2,15 @@ require("dotenv").config({
   path: "../../.env",
 });
 const router = require("express").Router();
-const aws = require("aws-sdk");
-const multer = require("multer");
-const multerS3 = require("multer-s3");
 const asyncHandler = require("express-async-handler");
 const db = require("../models");
-const { isUserLoggedIn } = require("../middlewares/userMiddlewares");
-const User = db.user;
 const File = db.file;
-const jwt = require("jsonwebtoken");
-
-const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME;
-
-// AWS Config
-aws.config.update({
-  secretAccessKey: process.env.AWS_ACCESS_SECRET,
-  accessKeyId: process.env.AWS_ACCESS_KEY,
-  region: "us-east-1",
-});
-
-const S3 = new aws.S3();
-
-const upload = multer({
-  storage: multerS3({
-    s3: S3,
-    acl: "public-read",
-    bucket: BUCKET_NAME,
-    key: function (req, file, cb) {
-      cb(null, `${Date.now()}-${file?.originalname}`);
-    },
-  }),
-});
+const { isUserLoggedIn } = require("../middlewares/userMiddlewares");
+const { upload, uploadFile } = require("../utils/fileUploadHelper");
+const compressPDF = require("../utils/fileCompressHelper");
+const fs = require("fs");
+const util = require("util");
+const unlinkFile = util.promisify(fs.unlink);
 
 // for uploading PDF to AWS S3
 router.post(
@@ -40,41 +18,45 @@ router.post(
   isUserLoggedIn,
   upload.single("file"),
   asyncHandler(async (req, res, next) => {
+    const inputFile = req.file;
+    let inputFilePath = req.file.path;
+    const user = req.user;
+    const MAX_UPLOAD_LIMIT = 6 * 1000 * 1000; // 6 MB
+
+    if (inputFile.size > MAX_UPLOAD_LIMIT) {
+      inputFilePath = await compressPDF(inputFilePath, user);
+    }
+
+    // uploading to AWS S3
+    const result = await uploadFile(req.file, inputFilePath, user);
+
+    // Deleting from local if uploaded in S3 bucket
+    await unlinkFile(inputFilePath.toString());
+
     // Save user to database
     File.create({
       userEmailId: req.user.email,
-      filePublicUrl: req.file.location,
+      filePublicUrl: result.Location,
       fileName: req.file.originalname,
       fileSize: req.file.size,
       fileType: req.file.mimetype,
     })
       .then((file) => {
         if (file) {
-          console.log(file);
           res
             .status(200)
             .send({ message: "File Upladed Successfully !", file });
         }
       })
       .catch((err) => {
-        console.log(err);
         res.status(500).send({
-          message: err.message || "error while uploading file",
+          message: err.message || "error while uploading file to database",
         });
       });
 
     // res.send("Successfully uploaded " + req?.file?.location + " location!");
   })
 );
-
-// for listing all files
-router.get("/list", async (req, res) => {
-  let r = await S3.listObjectsV2({
-    Bucket: process.env.AWS_S3_BUCKET_NAME,
-  }).promise();
-  let x = r.Contents.map((item) => item.Key);
-  res.send(x);
-});
 
 router.get(
   "/pdf/all",
