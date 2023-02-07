@@ -10,6 +10,7 @@ const { upload, uploadFile } = require("../utils/fileUploadHelper");
 const compressPDF = require("../utils/fileCompressHelper");
 const fs = require("fs");
 const util = require("util");
+const isFilePathNameValid = require("../utils/isFilePathNameValid");
 const unlinkFile = util.promisify(fs.unlink);
 
 // for uploading PDF to AWS S3
@@ -21,10 +22,28 @@ router.post(
     const inputFile = req.file;
     let inputFilePath = req.file.path;
     const user = req.user;
-    const MAX_UPLOAD_LIMIT = 6 * 1000 * 1000; // 6 MB
+    const MAX_UPLOAD_LIMIT = 2 * 1000 * 1000; // Preferred:- 6MB // Reduced to 2MB for Performance Improvement...
 
     if (inputFile.size > MAX_UPLOAD_LIMIT) {
-      inputFilePath = await compressPDF(inputFilePath, user);
+      // Checking file pathname for any unsupported special charecter
+      const result = isFilePathNameValid(inputFilePath);
+
+      if (result === false) {
+        return res.status(401).send({
+          message:
+            "Invalid File Name - Is should not contain any Special Character!",
+        });
+      } else {
+        try {
+          inputFilePath = await compressPDF(inputFilePath, user);
+        } catch (error) {
+          if (error) {
+            return res.status(401).send({
+              message: "Error occured in File Compression - Invalid File!",
+            });
+          }
+        }
+      }
     }
 
     // uploading to AWS S3
