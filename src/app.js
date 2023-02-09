@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 
 app.use(
   cors({
-    origin: ["http://localhost:3001"],
+    origin: ["http://localhost:3001", "pdf-viewer-mysql-aws-s3.netlify.app"],
     credentials: true,
   })
 );
