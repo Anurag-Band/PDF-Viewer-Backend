@@ -42,11 +42,11 @@ app.get("/", (req, res) => {
 
 // import all routes here
 const userRoute = require("./routes/user.routes");
-const fileRouteController = require("./routes/file.route.controller");
+const fileRoute = require("./routes/file.routes");
 
 //  router middleware
 app.use("/api/v1", userRoute);
-app.use("/api/v1", fileRouteController);
+app.use("/api/v1", fileRoute);
 
 // exporting app for index.js
 module.exports = app;
