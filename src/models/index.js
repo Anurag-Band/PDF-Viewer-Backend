@@ -6,7 +6,7 @@ const { Sequelize, DataTypes, Op } = require("sequelize");
 const sequelize = new Sequelize(
   process.env.DB,
   "freedb_pdf-viewer-user", // Hard Coded because it's not taking from .env
-  process.env.PASSWORD,
+  "2#HZcH5E%sUT$cZ",
   {
     host: process.env.HOST,
     dialect: "mysql",
