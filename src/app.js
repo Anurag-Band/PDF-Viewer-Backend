@@ -13,6 +13,7 @@ app.use(
       "pdf-viewer-mysql-aws-s3.netlify.app",
       "https://production--pdf-viewer-mysql-aws-s3.netlify.app",
     ],
+    "Access-Control-Allow-Credentials": true,
     credentials: true,
   })
 );
