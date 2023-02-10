@@ -5,6 +5,7 @@ const morgan = require("morgan");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
+// Cors Middleware
 app.use(
   cors({
     origin: [
@@ -15,6 +16,29 @@ app.use(
     credentials: true,
   })
 );
+
+// for adding headers to requests
+
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    "http://localhost:3001",
+    "pdf-viewer-mysql-aws-s3.netlify.app",
+    "https://production--pdf-viewer-mysql-aws-s3.netlify.app",
+  ];
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE");
+  res.header("Access-Control-Allow-Credentials", true);
+
+  return next();
+});
 
 // regular middleware
 app.use(express.json());
@@ -27,17 +51,6 @@ app.use(cookieParser());
 
 //morgan middleware
 app.use(morgan("tiny"));
-
-// for adding headers to requests
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin);
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-
-  next();
-});
 
 // test route
 app.get("/", (req, res) => {
